@@ -683,15 +683,26 @@ void App::processTextureUploadTasks()
         return;
     }
 
-    // When we finish importing images, we switch top image to the latest one.
     if (!isUndo && mTexturePool.hasNoPendingTasks()) {
+#if 0
+        // When we finish importing images, we switch top image to the latest one.
         mTopImageIndex = static_cast<int>(mImageList.size()) - 1;
         resetImageTransform(getTopImage()->size());
 
         if (mCmpImageIndex == -1 && mTopImageIndex >= 1) {
             mCmpImageIndex = 0;
         }
+#else
+        // When we finish importing images, we switch top image to the first one
+        // and compared image to the second one. This makes split and column
+        // comparisons follow the natural order of imported files.
+        mTopImageIndex = 0;
+        resetImageTransform(getTopImage()->size());
 
+        if (mCmpImageIndex == -1 && mImageList.size() > 1) {
+            mCmpImageIndex = 1;
+        }
+#endif
         mUpdateImageSelection = false;
     }
 }
@@ -807,6 +818,7 @@ void App::run(CompositeFlags initFlags)
             mPresentShader.setUniform("uImageSize", Vec2f(0.0f));
         }
 
+        mPresentShader.setUniform("uEnablePixelBorder", mEnablePixelBorder);
         mPresentShader.setUniform("uEnablePixelHighlight", !mIsMovingSplitter && !mIsScalingImage);
         mPresentShader.setUniform("uCursorPos", Vec2f(io.MousePos.x, io.DisplaySize.y - io.MousePos.y) + Vec2f(0.5f));
         mPresentShader.setUniform("uSideBySide", mCompositeFlags == CompositeFlags::SideBySide);
@@ -946,6 +958,8 @@ void    App::onKeyPressed(const ImGuiIO& io)
         mUseLinearFilter ^= true;
     } else if (ImGui::IsKeyPressed(0x57)) { // w
         mShowPixelMarker ^= true;
+    } else if (ImGui::IsKeyPressed(0x47)) { // g
+        mEnablePixelBorder ^= true;
     } else if (ImGui::IsKeyPressed(0x122)) { // F1
         ImGui::OpenPopup("Home");
     } else if (ImGui::IsKeyPressed(0x126)) { // F5
@@ -1806,6 +1820,7 @@ void    App::initHomeWindow(const char* name)
                 ImGui::Text("Toggle Split View");
                 ImGui::Text("Toggle Side-by-Side Column View");
                 ImGui::Text("Toggle Pixel Warning Markers");
+                ImGui::Text("Toggle Pixel Borders");
                 ImGui::Text("Toggle Linear Image Filter");
                 ImGui::NextColumn();
 
@@ -1814,6 +1829,7 @@ void    App::initHomeWindow(const char* name)
                 ImGui::Text("S");
                 ImGui::Text("C");
                 ImGui::Text("W");
+                ImGui::Text("G");
                 ImGui::Text("Q");
                 ImGui::NextColumn();
                 ImGui::Separator();

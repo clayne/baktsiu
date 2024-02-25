@@ -437,12 +437,12 @@ bool showPixelBorder(vec2 wh, vec2 offset, float imageScale)
     // We can't use the expressions above, they are not exactly the same, 
     // even though I don't know why.
     vec2 xy = floor(mod(wh - offset, imageScale));
-    return any(equal(xy, vec2(0.0))) && (imageScale > 5.0);
+    return any(equal(xy, vec2(0.0))) && (imageScale > 32.0);
 }
 
 bool showPixelBorderHighlight(vec2 wh, vec2 cursor, vec2 offset, float imageScale)
 {
-    if (!uEnablePixelHighlight || imageScale < 8.0) {
+    if (!uEnablePixelHighlight || imageScale < 48.0) {
         return false;
     }
 
